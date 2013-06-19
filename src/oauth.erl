@@ -77,7 +77,8 @@ signature_params(Consumer, Params, Token) ->
 
 signature_params(Consumer, Params) ->
   Timestamp = unix_timestamp(),
-  Nonce = base64:encode_to_string(crypto:rand_bytes(32)), % cf. ruby-oauth
+  % Nonce = base64:encode_to_string(crypto:rand_bytes(32)), % cf. ruby-oauth
+  Nonce = binary_to_hex(crypto:md5(crypto:rand_bytes(32))),
   [ {"oauth_version", "1.0"}
   , {"oauth_nonce", Nonce}
   , {"oauth_timestamp", integer_to_list(Timestamp)}
@@ -313,3 +314,8 @@ hex2dec(C) when C >= $A andalso C =< $F ->
   C - $A + 10;
 hex2dec(C) when C >= $0 andalso C =< $9 ->
   C - $0.
+
+binary_to_hex(Binary) ->
+  lists:flatten(lists:map(
+    fun(X) -> io_lib:format("~2.16.0b", [X]) end, 
+    binary_to_list(Binary))).
